@@ -72,6 +72,18 @@ export const extractFirstEmoji = (str: string): string => {
         }
       }
 
+      // Check for zero-width joiner sequences (ZWJ)
+      if (i + emojiLength < trimmed.length) {
+        //check for zero-width joiner
+        if (trimmed[i + emojiLength] === '\u200D' ){
+          const restOfZWJSequance = extractFirstEmoji(trimmed.substring(i+emojiLength+1));
+          if(restOfZWJSequance){
+            //Add one to account for the ZWJ
+            emojiLength += 1 + restOfZWJSequance.length;
+          }
+        }
+      }
+
       return trimmed.substring(i, i + emojiLength);
     }
 
@@ -122,6 +134,16 @@ export const isSingleEmoji = (str: string): boolean => {
       expectedLength += 1; // Variation selector
     }
   }
+
+  // Check for zero-width joiner sequences (ZWJ)
+  if (trimmed.length > expectedLength && trimmed[expectedLength] === '\u200D') {
+    const restOfZWJSequance = extractFirstEmoji(trimmed.substring(expectedLength+1));
+    if(restOfZWJSequance){
+      //Add one to account for the ZWJ
+      expectedLength += 1 + restOfZWJSequance.length;
+    }
+  }
+      
 
   // Must be exactly one emoji (with possible modifiers)
   return trimmed.length === expectedLength;
